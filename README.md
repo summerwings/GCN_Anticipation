@@ -16,3 +16,4 @@ Evaluate on Sample dataset:
 Train on Sample dataset:
 > python main.py
 
+In training, our default stream is only based on graph-level information, as we proposed in our paper. And, this source code also has an option to introduce pixel-level information into our network, referring to the previous SOTA (https://github.com/Flaick/Surgical-Workflow-Anticipation).
