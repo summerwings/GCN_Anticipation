@@ -1,5 +1,5 @@
 # Towards Graph Representation Learning Based Surgery Workflow Anticipation
-Code for the paper Towards Graph Representation Learning Based Surgery Workflow Anticipation
+Example Code for the paper Towards Graph Representation Learning Based Surgery Workflow Anticipation
 ## Environment Setup
 First please create an appropriate environment using conda: 
 
