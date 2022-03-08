@@ -18,4 +18,4 @@ Train on Sample dataset:
 
 In training, our default stream is only based on graph-level information, as we proposed in our paper. 
 
-Additionally, this source code also offers an option to introduce pixel-level information into our network to extend our network in different circumstances.
+Additionally, this source code also offers an option to introduce pixel-level information (refering to previous SOTA: https://github.com/Flaick/Surgical-Workflow-Anticipation) into our network to extend our network in different circumstances.
