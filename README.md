@@ -3,9 +3,9 @@ Example Code for the paper Towards Graph Representation Learning Based Surgery W
 ## Environment Setup
 First please create an appropriate environment using conda: 
 
-> conda env create -f surgery_stgcn.yaml
+> conda env create -f surgery.yaml
 > 
-> conda activate surgery_stgcn
+> conda activate surgery
 
 ## Test Pre-Trained Models
 Evaluate on Sample dataset:
