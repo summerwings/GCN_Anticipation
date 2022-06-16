@@ -280,36 +280,36 @@ class infer_GCN(nn.Module):
 
         # stat
         logging.debug('gpu {}'.format(torch.cuda.memory_reserved(device) / 1024 / 1024 / 1024))
-        logging.info('Whole Surgery RSD {}'.format(np.nanmean(tmp_RSD_val)))
-        logging.info('wMAE 2min tool {}'.format(np.nanmean(wtmp_tool_stageRSD_loss_values_2_val)))
-        logging.info('inMAE 2min tool {}'.format(np.nanmean(tmp_tool_stageRSD_loss_values_2_val)))
-        logging.info('pMAE 2min tool {}'.format(np.nanmean(ptmp_tool_stageRSD_loss_values_2_val)))
-        logging.info('eMAE 2min tool {}'.format(np.nanmean(etmp_tool_stageRSD_loss_values_2_val)))
+        logging.info('Whole Surgery RSD {}'.format(np.mean(tmp_RSD_val)))
+        logging.info('wMAE 2min tool {}'.format(np.mean(wtmp_tool_stageRSD_loss_values_2_val)))
+        logging.info('inMAE 2min tool {}'.format(np.mean(tmp_tool_stageRSD_loss_values_2_val)))
+        logging.info('pMAE 2min tool {}'.format(np.mean(ptmp_tool_stageRSD_loss_values_2_val)))
+        logging.info('eMAE 2min tool {}'.format(np.mean(etmp_tool_stageRSD_loss_values_2_val)))
 
-        logging.info('wMAE 2min stage {}'.format(np.nanmean(wtmp_stageRSD_loss_values_2_val)))
-        logging.info('inMAE 2min stage {}'.format(np.nanmean(tmp_stageRSD_loss_values_2_val)))
-        logging.info('pMAE 2min stage {}'.format(np.nanmean(ptmp_stageRSD_loss_values_2_val)))
-        logging.info('eMAE 2min stage {}'.format(np.nanmean(etmp_stageRSD_loss_values_2_val)))
+        logging.info('wMAE 2min stage {}'.format(np.mean(wtmp_stageRSD_loss_values_2_val)))
+        logging.info('inMAE 2min stage {}'.format(np.mean(tmp_stageRSD_loss_values_2_val)))
+        logging.info('pMAE 2min stage {}'.format(np.mean(ptmp_stageRSD_loss_values_2_val)))
+        logging.info('eMAE 2min stage {}'.format(np.mean(etmp_stageRSD_loss_values_2_val)))
 
-        logging.info('wMAE 3min tool {}'.format(np.nanmean(wtmp_tool_stageRSD_loss_values_3_val)))
-        logging.info('inMAE 3min tool {}'.format(np.nanmean(tmp_tool_stageRSD_loss_values_3_val)))
-        logging.info('pMAE 3min tool {}'.format(np.nanmean(ptmp_tool_stageRSD_loss_values_3_val)))
-        logging.info('eMAE 3min tool {}'.format(np.nanmean(etmp_tool_stageRSD_loss_values_3_val)))
+        logging.info('wMAE 3min tool {}'.format(np.mean(wtmp_tool_stageRSD_loss_values_3_val)))
+        logging.info('inMAE 3min tool {}'.format(np.mean(tmp_tool_stageRSD_loss_values_3_val)))
+        logging.info('pMAE 3min tool {}'.format(np.mean(ptmp_tool_stageRSD_loss_values_3_val)))
+        logging.info('eMAE 3min tool {}'.format(np.mean(etmp_tool_stageRSD_loss_values_3_val)))
 
-        logging.info('wMAE 3min stage {}'.format(np.nanmean(wtmp_stageRSD_loss_values_3_val)))
-        logging.info('inMAE 3min stage {}'.format(np.nanmean(tmp_stageRSD_loss_values_3_val)))
-        logging.info('pMAE 3min stage {}'.format(np.nanmean(ptmp_stageRSD_loss_values_3_val)))
-        logging.info('eMAE 3min stage {}'.format(np.nanmean(etmp_stageRSD_loss_values_3_val)))
+        logging.info('wMAE 3min stage {}'.format(np.mean(wtmp_stageRSD_loss_values_3_val)))
+        logging.info('inMAE 3min stage {}'.format(np.mean(tmp_stageRSD_loss_values_3_val)))
+        logging.info('pMAE 3min stage {}'.format(np.mean(ptmp_stageRSD_loss_values_3_val)))
+        logging.info('eMAE 3min stage {}'.format(np.mean(etmp_stageRSD_loss_values_3_val)))
 
-        logging.info('wMAE 5min tool {}'.format(np.nanmean(wtmp_tool_stageRSD_loss_values_5_val)))
-        logging.info('inMAE 5min tool {}'.format(np.nanmean(tmp_tool_stageRSD_loss_values_5_val)))
-        logging.info('pMAE 5min tool {}'.format(np.nanmean(ptmp_tool_stageRSD_loss_values_5_val)))
-        logging.info('eMAE 5min tool {}'.format(np.nanmean(etmp_tool_stageRSD_loss_values_5_val)))
+        logging.info('wMAE 5min tool {}'.format(np.mean(wtmp_tool_stageRSD_loss_values_5_val)))
+        logging.info('inMAE 5min tool {}'.format(np.mean(tmp_tool_stageRSD_loss_values_5_val)))
+        logging.info('pMAE 5min tool {}'.format(np.mean(ptmp_tool_stageRSD_loss_values_5_val)))
+        logging.info('eMAE 5min tool {}'.format(np.mean(etmp_tool_stageRSD_loss_values_5_val)))
 
-        logging.info('wMAE 5min stage {}'.format(np.nanmean(wtmp_stageRSD_loss_values_5_val)))
-        logging.info('inMAE 5min stage {}'.format(np.nanmean(tmp_stageRSD_loss_values_5_val)))
-        logging.info('pMAE 5min stage {}'.format(np.nanmean(ptmp_stageRSD_loss_values_5_val)))
-        logging.info('eMAE 5min stage {}'.format(np.nanmean(etmp_stageRSD_loss_values_5_val)))
+        logging.info('wMAE 5min stage {}'.format(np.mean(wtmp_stageRSD_loss_values_5_val)))
+        logging.info('inMAE 5min stage {}'.format(np.mean(tmp_stageRSD_loss_values_5_val)))
+        logging.info('pMAE 5min stage {}'.format(np.mean(ptmp_stageRSD_loss_values_5_val)))
+        logging.info('eMAE 5min stage {}'.format(np.mean(etmp_stageRSD_loss_values_5_val)))
 
         logging.info('tool 2min')
         self.stat_info(tool_wise_loss_2)
@@ -366,10 +366,10 @@ class infer_GCN(nn.Module):
     def stat_info(self, class_loss_lists):
 
         for i in range(len(class_loss_lists[0])):
-            logging.info('class {} wMAE {}'.format(i,np.nanmean(class_loss_lists[0][i])))
-            logging.info('class {} inMAE {}'.format(i,np.nanmean(class_loss_lists[1][i])))
-            logging.info('class {} pMAE {}'.format(i,np.nanmean(class_loss_lists[2][i])))
-            logging.info('class {} eMAE {}'.format(i,np.nanmean(class_loss_lists[3][i])))
+            logging.info('class {} wMAE {}'.format(i,np.mean(class_loss_lists[0][i])))
+            logging.info('class {} inMAE {}'.format(i,np.mean(class_loss_lists[1][i])))
+            logging.info('class {} pMAE {}'.format(i,np.mean(class_loss_lists[2][i])))
+            logging.info('class {} eMAE {}'.format(i,np.mean(class_loss_lists[3][i])))
 
 
 
