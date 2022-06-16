@@ -54,6 +54,7 @@ class SGCN(nn.Module):
         self.st_gcn_networks_start = nn.ModuleList((
             st_gcn(in_channels, self.channel_n_1, kernel_size, 1, residual=True, **kwargs0),
         ))
+        ### reduce other layers to simplify the model
         self.st_gcn_networks_middle = nn.ModuleList([
                 copy.deepcopy(
                     st_gcn(self.channel_n_2, self.channel_n_2, kernel_size, 1, **kwargs))
@@ -62,6 +63,7 @@ class SGCN(nn.Module):
         self.st_gcn_networks_end = nn.ModuleList((
             st_gcn(self.channel_n_2, self.channel_n_3, kernel_size, 1, **kwargs),
         ))
+
         self.st_gcn_networks = self.st_gcn_networks_start
 
         # initialize parameters for edge importance weighting
