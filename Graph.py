@@ -5,9 +5,12 @@ class Graph():
     def __init__(self,
                  max_hop=1,
                  strategy='uniform',
-                 dilation=1):
+                 dilation=1,
+                 mode = 'Simple'):
         self.max_hop = max_hop
         self.dilation = dilation
+
+        self.mode = mode
 
         self.get_edge()
         self.hop_dis = self.get_hop_distance(self.num_node, self.edge, max_hop=max_hop)
@@ -16,11 +19,348 @@ class Graph():
 
 
     def get_edge(self):
-        self.num_node = 8
-        self_link = [(i, i) for i in range(self.num_node)]
-        neighbor_link = [(0,7),(1,7),(2,7),(3,7),(4,7),(5,7),(6,7),(0,1),(0,3),(0,4),(0,5),(0,6),(2,1),(2,3),(2,4),(2,5),(2,6)]
-        self.edge = self_link + neighbor_link
-        self.center = 1
+        if self.mode == 'Prior':
+            self.num_node = 8
+            self_link = [(i, i) for i in range(self.num_node)]
+            neighbor_link = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (1, 2), (1, 4), (1, 5), (1, 6),
+                             (1, 7), (3, 2), (3, 4), (3, 5), (3, 6), (3, 7)]
+            self.edge = self_link + neighbor_link
+            self.center = 1
+
+
+        if self.mode == 'Full':
+            self.num_node = 8
+            self_link = [(i, i) for i in range(self.num_node)]
+            neighbor_link = [(i, j) for i in range(self.num_node) for j in range(self.num_node)]
+            self.edge = neighbor_link # self_link
+            self.center = 1
+
+        if self.mode == 's0':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 3) and (j == 0 or j == 1 or j == 3):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's1':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 3) and (j == 0 or j == 3):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's2':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1) and (j == 0 or j == 1):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's3':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0) and (j == 0):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's4':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 7) and (j == 0 or j == 1 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's5':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 6) and (j == 0 or j == 1 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's6':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 6) and (j == 0 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's7':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 2) and (j == 0 or j == 1 or j == 2):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's8':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 2) and (j == 0 or j == 2):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's9':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 5) and (j == 0 or j == 5):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's10':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 5) and (j == 0 or j == 1 or j == 5):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's11':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 4) and (j == 0 or j == 4):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's12':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 7) and (j == 0 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's13':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 4) and (j == 0 or j == 1 or j == 4):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's14':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 3 or i == 6) and (j == 0 or j == 3 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's15':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 6 or i == 7) and (j == 0 or j == 1 or j == 6 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's16':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 6 or i == 7) and (j == 0 or j == 6 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's17':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 2 or i == 6) and (j == 0 or j == 2 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's18':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 2 or i == 6 or i == 7) and (j == 0 or j == 2 or j == 6 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's19':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 2 or i == 6) and (j == 0 or j == 1 or j == 2 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's20':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 2 or i == 7) and (j == 0 or j == 1 or j == 2 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's21':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 2 or i == 7) and (j == 0 or j == 2 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's22':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 3 or i == 6) and (j == 0 or j == 1 or j == 3 or j == 6):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's23':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 1 or i == 3 or i == 7) and (j == 0 or j == 1 or j == 3 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's24':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 3 or i == 7) and (j == 0 or j == 3 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 's25':
+            self.num_node = 8
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if (i == 0 or i == 4 or i == 6 or i == 7) and (j == 0 or j == 4 or j == 6 or j == 7):
+                        neighbor_link.append((i, j))
+
+            self.edge = neighbor_link
+            self.center = 1
+
+        if self.mode == 'Simple':
+            self.num_node = 8
+            self_link = [(i, i) for i in range(self.num_node)]
+
+            neighbor_link = []
+            for i in range(self.num_node):
+                for j in range(self.num_node):
+                    if i !=j and (i == 0):
+                        neighbor_link.append((i, j))
+
+            self.edge = self_link + neighbor_link
+            self.center = 1
+
+
 
     def get_adjacency(self, strategy):
         valid_hop = range(0, self.max_hop + 1, self.dilation)
@@ -102,5 +442,3 @@ class Graph():
                 Dn[i, i] = Dl[i]**(-0.5)
         DAD = np.dot(np.dot(Dn, A), Dn)
         return DAD
-
-

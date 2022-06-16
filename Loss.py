@@ -49,16 +49,16 @@ class anticipation_mae(nn.Module):
 
                 if output_inMAE.size(0) > 0:
                     ninMAE += 1
-                    inMAE += torch.nanmean(output_inMAE)
+                    inMAE += torch.mean(output_inMAE)
 
                 if output_pMAE.size(0) > 0:
                     npMAE += 1
-                    pMAE += torch.nanmean(output_pMAE)
+                    pMAE += torch.mean(output_pMAE)
 
 
                 if output_eMAE.size(0)>0:
                     neMAE += 1
-                    eMAE += torch.nanmean(output_eMAE)
+                    eMAE += torch.mean(output_eMAE)
 
         # ensure the zero size would be nan
         wMAE = wMAE/nwMAE

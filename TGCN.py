@@ -50,6 +50,7 @@ class ConvTemporalGraphical(nn.Module):
             dilation=(t_dilation, 1),
             bias=bias)
 
+
     def forward(self, x, A):
         assert A.size(0) == self.kernel_size
 

@@ -92,8 +92,6 @@ class SingleStageModel(nn.Module):
 
 
     def forward(self, x):
-        T, C, M = x.size()
-        x = x.permute(0, 2, 1).contiguous() # change the size to N, C, T
         out = self.conv_1x1(x)
 
 

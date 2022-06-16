@@ -11,12 +11,12 @@ from GCN_RSDNet import GCNProgressNet
 from Loss import anticipation_mae
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-
 class train_GCN(nn.Module):
 
     def __init__(self, random_seed,
-                 train_dir=r'Sample\Train',
-                 val_dir = r'Sample\Val',
+                 train_dir=r'Sample/Train',
+                 val_dir = r'Sample/Val',
+                 model = GCNProgressNet(),
                  ):
 
         super(train_GCN, self).__init__()
@@ -24,18 +24,30 @@ class train_GCN(nn.Module):
         self.train_dir = train_dir
         self.val_dir = val_dir
         self.seed = random_seed
+        self.model = model
 
-    def train(self, epochs = 40, val_step =1):
+
+
+    def train(self, config = None):
         # set seed
         self.setup_seed(self.seed)
+        epochs = 100
+        val_step = 1
+
+        lr = 0.002
+        w1 = 0.90
+        w2 = 0.10
+        w3 = 0.80
+        w4 = 0.30
 
         # load model
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(torch.cuda.get_device_name(0))
-        model = GCNProgressNet(stream='Graph').to(device)
+        model = self.model.to(device)
 
         # train setting
-        optimizer = torch.optim.Adam(model.parameters(), lr=5e-5, weight_decay=1e-5)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        loss_RSD = nn.L1Loss()
         loss_anticipation_train = anticipation_mae().to(device)
         loss_anticipation = anticipation_mae().to(device)
         loss_anticipation_2 = anticipation_mae(h=3000).to(device)
@@ -46,9 +58,11 @@ class train_GCN(nn.Module):
         val_step = val_step
 
         # set metrics
+        RSD_train = []
         stage_RSD_loss_values_train = []
         tool_RSD_loss_values_train = []
 
+        RSD_val = []
         stage_RSD_loss_values_val = []
         tool_RSD_loss_values_val = []
 
@@ -60,6 +74,7 @@ class train_GCN(nn.Module):
         # train
         for i in range(epochs):
 
+            tmp_RSD_train = []
             tmp_stageRSD_loss_values_train = []
             tmp_tool_stageRSD_loss_values_train = []
 
@@ -67,7 +82,7 @@ class train_GCN(nn.Module):
 
             num = 0
 
-            train_data_loader = DataLoader(SurgeryVideoDataset(self.train_dir), batch_size=32, shuffle=True)
+            train_data_loader = DataLoader(SurgeryVideoDataset(self.train_dir), batch_size=1, shuffle=True)
 
             for b, b_data in enumerate(train_data_loader):
                 logging.info('epoch {} batch {}'.format(i, b))
@@ -75,33 +90,53 @@ class train_GCN(nn.Module):
                 bb = b_data['boxes'].to(device)
                 stage_RSD = b_data['stage_RSD'][:, :, 1:].to(device)
                 tool_RSD = b_data['tool_RSD'].to(device)
+                RSD = b_data['RSD'].to(device)
 
                 model.train()
                 optimizer.zero_grad()
                 # feed data
-                output_feature, output_stg_RSD, output_tool_stg_RSD = model(data, bb)
+                output_feature, output_stg_RSD, output_tool_stg_RSD, output_RSD = model(data, bb)
+
+                # RSD
+                loss_allRSD = loss_RSD(output_RSD,RSD)
+                loss_allRSD_minute = loss_allRSD/ 25 / 60
+                tmp_RSD_train.append(loss_allRSD_minute.item())
 
                 # tool stage rsd
-                loss_tool_stg_rsd_2, inloss_tool_stg_rsd_2, _, _ = loss_anticipation_2(output_tool_stg_RSD[:, :, :5],
-                                                                                       tool_RSD)
-                loss_tool_stg_rsd_3, inloss_tool_stg_rsd_3, _, _ = loss_anticipation_3(output_tool_stg_RSD[:, :, 5:10],
-                                                                                       tool_RSD)
-                loss_tool_stg_rsd, inloss_tool_stg_rsd, _, _ = loss_anticipation_train(output_tool_stg_RSD[:, :, 10:],
-                                                                                       tool_RSD)
+                loss_tool_stg_rsd_2, inloss_tool_stg_rsd_2, ploss_tool_stg_rsd_2, eloss_tool_stg_rsd_2 = loss_anticipation_2(
+                    output_tool_stg_RSD[:, :, :5],
+                    tool_RSD)
+                loss_tool_stg_rsd_3, inloss_tool_stg_rsd_3, ploss_tool_stg_rsd_3, eloss_tool_stg_rsd_3 = loss_anticipation_3(
+                    output_tool_stg_RSD[:, :, 5:10],
+                    tool_RSD)
+                loss_tool_stg_rsd, inloss_tool_stg_rsd, ploss_tool_stg_rsd, eloss_tool_stg_rsd = loss_anticipation_train(
+                    output_tool_stg_RSD[:, :, 10:],
+                    tool_RSD)
 
-                loss_tool_stg_all = inloss_tool_stg_rsd + inloss_tool_stg_rsd_2 + inloss_tool_stg_rsd_3
+                loss_tool_stg_all = w1*(loss_tool_stg_rsd + loss_tool_stg_rsd_2 + loss_tool_stg_rsd_3) + \
+                                    w2*(inloss_tool_stg_rsd + inloss_tool_stg_rsd_2 + inloss_tool_stg_rsd_3) + \
+                                    w3*(ploss_tool_stg_rsd + ploss_tool_stg_rsd_2 + ploss_tool_stg_rsd_3) + \
+                                    w4*(eloss_tool_stg_rsd + eloss_tool_stg_rsd_2 + eloss_tool_stg_rsd_3)
+
                 loss_tool_stg_minute = loss_tool_stg_all / 25 / 60
                 tmp_tool_stageRSD_loss_values_train.append(loss_tool_stg_minute.item())
                 # stage rsd
-                loss_stg_rsd_2, inloss_stg_rsd_2, _, _ = loss_anticipation_2(output_stg_RSD[:, :, :6], stage_RSD)
-                loss_stg_rsd_3, inloss_stg_rsd_3, _, _ = loss_anticipation_3(output_stg_RSD[:, :, 6:12], stage_RSD)
-                loss_stg_rsd, inloss_stg_rsd, _, _ = loss_anticipation_train(output_stg_RSD[:, :, 12:], stage_RSD)
-                loss_stg_rsd_all = inloss_stg_rsd+inloss_stg_rsd_2+inloss_stg_rsd_3
+                loss_stg_rsd_2, inloss_stg_rsd_2, ploss_stg_rsd_2, eloss_stg_rsd_2 = loss_anticipation_2(
+                    output_stg_RSD[:, :, :6], stage_RSD)
+                loss_stg_rsd_3, inloss_stg_rsd_3, ploss_stg_rsd_3, eloss_stg_rsd_3 = loss_anticipation_3(
+                    output_stg_RSD[:, :, 6:12], stage_RSD)
+                loss_stg_rsd, inloss_stg_rsd, ploss_stg_rsd, eloss_stg_rsd = loss_anticipation_train(
+                    output_stg_RSD[:, :, 12:], stage_RSD)
+                loss_stg_rsd_all = w1*(loss_stg_rsd + loss_stg_rsd_2 + loss_stg_rsd_3) + \
+                                   w2*(inloss_stg_rsd + inloss_stg_rsd_2 + inloss_stg_rsd_3) + \
+                                   w3*(ploss_stg_rsd + ploss_stg_rsd_2 + ploss_stg_rsd_3) + \
+                                   w4*(eloss_stg_rsd + eloss_stg_rsd_2 + eloss_stg_rsd_3)
+
                 loss_stg_minute = loss_stg_rsd_all / 25 / 60
                 tmp_stageRSD_loss_values_train.append(loss_stg_minute.item())
 
                 # total loss
-                loss_total = loss_tool_stg_minute + loss_stg_minute  # + loss_stg #+ loss_sim# +loss_minute + loss_stg + loss_Elapsed_minute #att_loss+ loss_stg_minute + att_loss
+                loss_total = loss_tool_stg_minute + loss_stg_minute # + loss_stg #+ loss_sim# +loss_minute + loss_stg + loss_Elapsed_minute #att_loss+ loss_stg_minute + att_loss
                 tmp_total_loss_train.append(loss_total.item())
 
                 # optimize
@@ -109,15 +144,19 @@ class train_GCN(nn.Module):
                 optimizer.step()
                 num += 1
 
+
+
             logging.info('EPOCH:{},NUM:{},loss={}'.format(i, num, loss_total))
 
             # stat
+            RSD_train.append(np.nanmean(tmp_RSD_train))
             stage_RSD_loss_values_train.append(np.nanmean(tmp_stageRSD_loss_values_train))
             tool_RSD_loss_values_train.append(np.nanmean(tmp_tool_stageRSD_loss_values_train))
             total_loss_train.append(np.nanmean(tmp_total_loss_train))
 
             if (i + 1) % val_step == 0:
 
+                tmp_RSD_val = []
                 tmp_tool_stageRSD_loss_values_val = []
                 tmp_stageRSD_loss_values_val = []
                 tmp_total_loss_val = []
@@ -171,29 +210,41 @@ class train_GCN(nn.Module):
                     bb = v_data['boxes'].to(device)
                     stage_RSD = v_data['stage_RSD'][:, :, 1:].to(device)
                     tool_RSD = v_data['tool_RSD'].to(device)
+                    RSD = v_data['RSD'].to(device)
 
                     with torch.no_grad():
-                        output_feature, output_stg_RSD, output_tool_stg_RSD = model(data, bb)
+                        # feed data
+                        output_feature, output_stg_RSD, output_tool_stg_RSD, output_RSD = model(data, bb)
 
+                    # RSD
+                    loss_allRSD = loss_RSD(output_RSD, RSD)
+                    loss_allRSD_minute = loss_allRSD / 25 / 60
+                    tmp_RSD_val.append(loss_allRSD_minute.item())
                     # tool stage rsd
-                    loss_tool_stg_rsd_2, inloss_tool_stg_rsd_2, _, _ = loss_anticipation_2(
+                    loss_tool_stg_rsd_2, inloss_tool_stg_rsd_2, ploss_tool_stg_rsd_2, eloss_tool_stg_rsd_2 = loss_anticipation_2(
                         output_tool_stg_RSD[:, :, :5],
                         tool_RSD)
-                    loss_tool_stg_rsd_3, inloss_tool_stg_rsd_3, _, _ = loss_anticipation_3(
+                    loss_tool_stg_rsd_3, inloss_tool_stg_rsd_3, ploss_tool_stg_rsd_3, eloss_tool_stg_rsd_3 = loss_anticipation_3(
                         output_tool_stg_RSD[:, :, 5:10],
                         tool_RSD)
-                    loss_tool_stg_rsd, inloss_tool_stg_rsd, _, _ = loss_anticipation_train(
+                    loss_tool_stg_rsd, inloss_tool_stg_rsd, ploss_tool_stg_rsd, eloss_tool_stg_rsd = loss_anticipation_train(
                         output_tool_stg_RSD[:, :, 10:],
                         tool_RSD)
 
-                    loss_tool_stg_all = inloss_tool_stg_rsd + inloss_tool_stg_rsd_2 + inloss_tool_stg_rsd_3
+                    loss_tool_stg_all = (loss_tool_stg_rsd + loss_tool_stg_rsd_2 + loss_tool_stg_rsd_3) +\
+                                        (inloss_tool_stg_rsd + inloss_tool_stg_rsd_2 + inloss_tool_stg_rsd_3) + \
+                                        (ploss_tool_stg_rsd + ploss_tool_stg_rsd_2 + ploss_tool_stg_rsd_3) + \
+                                        (eloss_tool_stg_rsd + eloss_tool_stg_rsd_2 + eloss_tool_stg_rsd_3)
                     loss_tool_stg_minute = loss_tool_stg_all / 25 / 60
                     tmp_tool_stageRSD_loss_values_val.append(loss_tool_stg_minute.item())
                     # stage rsd
-                    loss_stg_rsd_2, inloss_stg_rsd_2, _, _ = loss_anticipation_2(output_stg_RSD[:, :, :6], stage_RSD)
-                    loss_stg_rsd_3, inloss_stg_rsd_3, _, _ = loss_anticipation_3(output_stg_RSD[:, :, 6:12], stage_RSD)
-                    loss_stg_rsd, inloss_stg_rsd, _, _ = loss_anticipation_train(output_stg_RSD[:, :, 12:], stage_RSD)
-                    loss_stg_rsd_all = inloss_stg_rsd+inloss_stg_rsd_2+inloss_stg_rsd_3
+                    loss_stg_rsd_2, inloss_stg_rsd_2, ploss_stg_rsd_2, eloss_stg_rsd_2 = loss_anticipation_2(output_stg_RSD[:, :, :6], stage_RSD)
+                    loss_stg_rsd_3, inloss_stg_rsd_3, ploss_stg_rsd_3, eloss_stg_rsd_3 = loss_anticipation_3(output_stg_RSD[:, :, 6:12], stage_RSD)
+                    loss_stg_rsd, inloss_stg_rsd, ploss_stg_rsd, eloss_stg_rsd = loss_anticipation_train(output_stg_RSD[:, :, 12:], stage_RSD)
+                    loss_stg_rsd_all = (loss_stg_rsd+loss_stg_rsd_2+loss_stg_rsd_3) +\
+                                       (inloss_stg_rsd + inloss_stg_rsd_2 + inloss_stg_rsd_3) + \
+                                       (ploss_stg_rsd + ploss_stg_rsd_2 + ploss_stg_rsd_3) + \
+                                       (eloss_stg_rsd + eloss_stg_rsd_2 + eloss_stg_rsd_3)
                     loss_stg_minute = loss_stg_rsd_all / 25 / 60
                     tmp_stageRSD_loss_values_val.append(loss_stg_minute.item())
 
@@ -286,6 +337,9 @@ class train_GCN(nn.Module):
 
                     logging.debug('gpu {}'.format(torch.cuda.memory_reserved(device) / 1024 / 1024 / 1024))
 
+
+
+
                 if np.nanmean(tmp_total_loss_val) < min_RSD_MAE:
                     logging.info('save model for epoch {}'.format(i))
                     torch.save(model.state_dict(), 'best_PNet_epoch.pth')
@@ -299,9 +353,11 @@ class train_GCN(nn.Module):
                     '''
 
                 # stat
+                RSD_val.append(np.nanmean(tmp_RSD_val))
                 stage_RSD_loss_values_val.append(np.nanmean(tmp_stageRSD_loss_values_val))
                 tool_RSD_loss_values_val.append(np.nanmean(tmp_tool_stageRSD_loss_values_val))
                 total_loss_val.append(np.nanmean(tmp_total_loss_val))
+                logging.info('the RSD for whole surgery {}'.format(np.nanmean(tmp_RSD_val)))
                 logging.info('wMAE 2min tool {}'.format(np.nanmean(wtmp_tool_stageRSD_loss_values_2_val)))
                 logging.info('inMAE 2min tool {}'.format(np.nanmean(tmp_tool_stageRSD_loss_values_2_val)))
                 logging.info('pMAE 2min tool {}'.format(np.nanmean(ptmp_tool_stageRSD_loss_values_2_val)))
@@ -334,37 +390,49 @@ class train_GCN(nn.Module):
 
             plt.figure("train", (32, 12))
 
-            plt.subplot(2, 3, 1)
+            plt.subplot(2, 4, 1)
+            plt.title("Train RSD MAE Loss")
+            x = [(i + 1) for i in range(len(RSD_train))]
+            plt.xlabel("epoch")
+            plt.plot(x, RSD_train)
+
+            plt.subplot(2, 4, 2)
             plt.title("Train Stage RSD MAE Loss")
             x = [(i + 1) for i in range(len(stage_RSD_loss_values_train))]
             plt.xlabel("epoch")
             plt.plot(x, stage_RSD_loss_values_train)
 
-            plt.subplot(2, 3, 2)
+            plt.subplot(2, 4, 3)
             plt.title("Train Tool RSD Time MAE Loss")
             x = [(i + 1) for i in range(len(tool_RSD_loss_values_train))]
             plt.xlabel("epoch")
             plt.plot(x, tool_RSD_loss_values_train)
 
-            plt.subplot(2, 3, 3)
+            plt.subplot(2, 4, 4)
             plt.title("Train Total Loss")
             x = [(i + 1) for i in range(len(total_loss_train))]
             plt.xlabel("epoch")
             plt.plot(x, total_loss_train)
 
-            plt.subplot(2, 3, 4)
+            plt.subplot(2, 4, 5)
+            plt.title("Val RSD MAE Loss")
+            x = [(i + 1) for i in range(len(RSD_val))]
+            plt.xlabel("epoch")
+            plt.plot(x, RSD_val)
+
+            plt.subplot(2, 4, 6)
             plt.title("Val Stage RSD MAE Loss")
             x = [(i + 1) for i in range(len(stage_RSD_loss_values_val))]
             plt.xlabel("epoch")
             plt.plot(x, stage_RSD_loss_values_val)
 
-            plt.subplot(2, 3, 5)
+            plt.subplot(2, 4, 7)
             plt.title("Val Tool RSD Time MAE Loss")
             x = [(i + 1) for i in range(len(tool_RSD_loss_values_val))]
             plt.xlabel("epoch")
             plt.plot(x, tool_RSD_loss_values_val)
 
-            plt.subplot(2, 3, 6)
+            plt.subplot(2, 4, 8)
             plt.title("Val Total Loss")
             plt.xlabel("epoch")
             x = [(i + 1) * 1 for i in range(len(total_loss_val))]
@@ -373,6 +441,8 @@ class train_GCN(nn.Module):
             save_dir = r'PNet_loss.png'
             plt.savefig(save_dir)
             plt.close("train")
+
+
 
 
 

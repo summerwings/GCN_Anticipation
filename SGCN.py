@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,7 +8,7 @@ from torch.autograd import Variable
 from TGCN import ConvTemporalGraphical
 from Graph import Graph
 
-class STGCN(nn.Module):
+class SGCN(nn.Module):
     r"""Spatial temporal graph convolutional networks.
     Args:
         in_channels (int): Number of channels in the input data
@@ -25,15 +27,16 @@ class STGCN(nn.Module):
     """
 
     def __init__(self, in_channels, num_class, graph_args,
-                 edge_importance_weighting, attention, **kwargs):
+                 edge_importance_weighting, attention, gcn_layer, graph_mode = 'Simple',  **kwargs):
         super().__init__()
 
 
 
         # load graph
-        self.graph = Graph(**graph_args)
+        self.graph = Graph(mode = graph_mode, **graph_args)
 
         A = torch.tensor(self.graph.A, dtype=torch.float32, requires_grad=False)
+
         self.register_buffer('A', A)
 
         # build networks
@@ -43,17 +46,23 @@ class STGCN(nn.Module):
         self.data_bn = nn.BatchNorm1d(in_channels * A.size(1))
         kwargs0 = {k: v for k, v in kwargs.items() if k != 'dropout'}
 
-        self.channel_n_1 = 64
-        self.channel_n_2 = 128
-        self.channel_n_3 = 256
+        # create the stgcn to learn
+        self.channel_n_1 = 16
+        self.channel_n_2 = 16
+        self.channel_n_3 = 16
 
-        self.st_gcn_networks = nn.ModuleList((
+        self.st_gcn_networks_start = nn.ModuleList((
             st_gcn(in_channels, self.channel_n_1, kernel_size, 1, residual=True, **kwargs0),
-            st_gcn(self.channel_n_1, self.channel_n_2, kernel_size, 1, **kwargs),
-            #st_gcn(self.channel_n_2, self.channel_n_2, kernel_size, 1, **kwargs),
-            st_gcn(self.channel_n_2, self.channel_n_3, kernel_size, 1, **kwargs),
-            st_gcn(self.channel_n_3, self.channel_n_3, kernel_size, 1, **kwargs),
         ))
+        self.st_gcn_networks_middle = nn.ModuleList([
+                copy.deepcopy(
+                    st_gcn(self.channel_n_2, self.channel_n_2, kernel_size, 1, **kwargs))
+                for i in range(gcn_layer)
+            ])
+        self.st_gcn_networks_end = nn.ModuleList((
+            st_gcn(self.channel_n_2, self.channel_n_3, kernel_size, 1, **kwargs),
+        ))
+        self.st_gcn_networks = self.st_gcn_networks_start
 
         # initialize parameters for edge importance weighting
         if edge_importance_weighting:
@@ -71,23 +80,14 @@ class STGCN(nn.Module):
 
 
 
-    def forward(self, x, displacement =True):
 
-        if displacement:
-            displacement_x = x.clone()
-            displacement_x[:,0,:,0:2] = 0
-            # transfer to displacement
-            for n in range(x.size(0)):
-                for t in range(1, x.size(1)):
-                    for c in range(x.size(2)):
-                        displacement_x[n ,t, c, 0] = x[n, t, c, 0] - x[n, t - 1, c, 0]
-                        displacement_x[n, t, c, 1] = x[n, t, c, 1] - x[n, t - 1, c, 1]
 
-            x = displacement_x
+    def forward(self, x):
 
         x = x.unsqueeze(-1)
+
         N, T, V, C, M = x.size()
-        x = x.permute(0, 3, 1, 2, 4).contiguous()
+        x = x.permute(0, 3, 1, 2, 4).contiguous() # N C T V M
 
         if self.attention:
             # attention
@@ -107,10 +107,12 @@ class STGCN(nn.Module):
         x = x.permute(0, 1, 3, 4, 2).contiguous()
         x = x.view(N * M, C, T, V)
 
+
+
         # forwad
         for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
 
-            x, _ = gcn(x, self.A * importance)
+            x, _ = gcn(x, self.A * importance )
 
 
         # fcn
@@ -210,6 +212,7 @@ class st_gcn(nn.Module):
 
         self.relu = nn.ReLU(inplace=True)
 
+
     def forward(self, x, A):
 
         # res = self.residual(x)
@@ -217,3 +220,4 @@ class st_gcn(nn.Module):
         # x = self.tcn(x) + res
 
         return self.relu(x), A
+

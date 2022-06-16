@@ -22,7 +22,7 @@ import glob
 class infer_GCN(nn.Module):
 
     def __init__(self,
-                 test_dir = r'Sample\Test',
+                 test_dir = r'Sample/Test',
                  ):
 
         super(infer_GCN, self).__init__()
@@ -36,6 +36,8 @@ class infer_GCN(nn.Module):
         model_path = r'best_PNet_epoch.pth'
         model.load_state_dict(torch.load(model_path))
 
+        loss_RSD = nn.L1Loss()
+
         loss_anticipation_train = anticipation_mae().to(device)
         loss_anticipation = anticipation_mae().to(device)
         loss_anticipation_2 = anticipation_mae(h=3000).to(device)
@@ -44,6 +46,8 @@ class infer_GCN(nn.Module):
         class_wise_loss_anticipation_loss = class_wise_anticipation_mae().to(device)
         class_wise_loss_anticipation_loss_2 = class_wise_anticipation_mae(h=3000).to(device)
         class_wise_loss_anticipation_loss_3 = class_wise_anticipation_mae(h=4500).to(device)
+
+        tmp_RSD_val = []
 
         tmp_tool_stageRSD_loss_values_val = []
         tmp_stageRSD_loss_values_val = []
@@ -97,6 +101,9 @@ class infer_GCN(nn.Module):
         phase_wise_loss_3 = [[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]]]
         phase_wise_loss  =  [[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]],[[],[],[],[],[],[]]]
 
+        # action record
+        action_tool_list = []
+        action_phase_list = []
 
         t_data_loader = DataLoader(SurgeryVideoDataset(self.test_dir), shuffle=False)
 
@@ -111,29 +118,43 @@ class infer_GCN(nn.Module):
             bb = t_data['boxes'].to(device)
             tmp_stage_RSD = t_data['stage_RSD'][:, :, 1:].to(device)
             tmp_tool_RSD = t_data['tool_RSD'].to(device)
+            tmp_RSD = t_data['RSD'].to(device)
 
-            output_feature, tmp_output_stg_RSD, tmp_output_tool_stg_RSD, frames = self.infer_one_clip(model, data, bb)
+            output_feature, tmp_output_stg_RSD, tmp_output_tool_stg_RSD, tmp_output_RSD, frames = self.infer_one_clip(model, data, bb)
 
             if t == 0:
                 output_stg_RSD = tmp_output_stg_RSD
                 output_tool_stg_RSD = tmp_output_tool_stg_RSD
+                output_RSD = tmp_output_RSD
+
 
                 stage_RSD = tmp_stage_RSD
                 tool_RSD = tmp_tool_RSD
+                RSD = tmp_RSD
+
 
                 frames_total = frames
 
             else:
                 output_stg_RSD = torch.cat((output_stg_RSD, tmp_output_stg_RSD), dim=1)
                 output_tool_stg_RSD = torch.cat((output_tool_stg_RSD, tmp_output_tool_stg_RSD), dim=1)
+                output_RSD = torch.cat((output_RSD, tmp_output_RSD), dim=1)
+
                 stage_RSD = torch.cat((stage_RSD, tmp_stage_RSD), dim=1)
                 tool_RSD = torch.cat((tool_RSD, tmp_tool_RSD), dim=1)
+                RSD = torch.cat((RSD, tmp_RSD), dim=1)
+
                 frames_total += frames
 
         time_end = time.time()
 
         time_cost_total = time_end - time_start
         logging.info('time cost {}'.format(time_cost_total / frames_total))
+
+        # RSD
+        loss_allRSD = loss_RSD(output_RSD, RSD)
+        loss_allRSD_minute = loss_allRSD / 25 / 60
+        tmp_RSD_val.append(loss_allRSD_minute.item())
 
         # tool stage rsd
         _, loss_tool_stg_rsd_2, _, _ = loss_anticipation_2(output_tool_stg_RSD[:, :, :5], tool_RSD)
@@ -258,6 +279,8 @@ class infer_GCN(nn.Module):
         phase_wise_loss = self.app_item(phase_wise_loss, output_loss_list)
 
         # stat
+        logging.debug('gpu {}'.format(torch.cuda.memory_reserved(device) / 1024 / 1024 / 1024))
+        logging.info('Whole Surgery RSD {}'.format(np.nanmean(tmp_RSD_val)))
         logging.info('wMAE 2min tool {}'.format(np.nanmean(wtmp_tool_stageRSD_loss_values_2_val)))
         logging.info('inMAE 2min tool {}'.format(np.nanmean(tmp_tool_stageRSD_loss_values_2_val)))
         logging.info('pMAE 2min tool {}'.format(np.nanmean(ptmp_tool_stageRSD_loss_values_2_val)))
@@ -320,17 +343,21 @@ class infer_GCN(nn.Module):
         f = 0
         for t in range(clip_length):
             with torch.no_grad():
-                output_feature, tmp_output_stg_RSD, tmp_output_tool_stg_RSD = model(data, bb[:, :t + 1, :, :])
+                output_feature, tmp_output_stg_RSD, tmp_output_tool_stg_RSD, tmp_RSD = model(data, bb[:, :t + 1, :, :])
+                tmp_RSD = tmp_RSD
             f += 1
             if t == 0:
                 output_stg_RSD = tmp_output_stg_RSD[:, t:t + 1, :]
                 output_tool_stg_RSD = tmp_output_tool_stg_RSD[:, t:t + 1, :]
+                output_RSD = tmp_RSD[:, t:t + 1]
+
 
             else:
                 output_stg_RSD = torch.cat((output_stg_RSD, tmp_output_stg_RSD[:, t:t + 1, :]), dim=1)
                 output_tool_stg_RSD = torch.cat((output_tool_stg_RSD, tmp_output_tool_stg_RSD[:, t:t + 1, :]), dim=1)
+                output_RSD = torch.cat((output_RSD, tmp_RSD[:, t:t + 1]), dim=1)
 
-        return output_feature, output_stg_RSD, output_tool_stg_RSD, f
+        return output_feature, output_stg_RSD, output_tool_stg_RSD, output_RSD, f
 
 
 
