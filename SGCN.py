@@ -63,7 +63,7 @@ class SGCN(nn.Module):
         self.st_gcn_networks_end = nn.ModuleList((
             st_gcn(self.channel_n_2, self.channel_n_3, kernel_size, 1, **kwargs),
         ))
-
+        # To simplify your network, we just use one layer GCN
         self.st_gcn_networks = self.st_gcn_networks_start
 
         # initialize parameters for edge importance weighting
