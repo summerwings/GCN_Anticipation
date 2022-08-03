@@ -19,3 +19,18 @@ Train on Sample dataset:
 In training, our default stream is only based on graph-level information, as we proposed in our paper. 
 
 Additionally, this source code also offers an option to introduce pixel-level information (refering to previous SOTA: https://github.com/Flaick/Surgical-Workflow-Anticipation) into our network to extend our network in different circumstances.
+
+## Citing
+
+If you find this work useful, please consider our paper to cite:
+
+```
+@inproceedings{zhang22towards,
+ author={Zhang, Xiatian and Moubayed, Noura Al and Shum, Hubert P. H.},
+ booktitle={Proceedings of the 2022 IEEE-EMBS International Conference on Biomedical and Health Informatics},
+ title={Towards Graph Representation Learning Based Surgery Workflow Anticipation},
+ year={2022},
+ publisher={IEEE},
+ location={Ioannina, Greece},
+}
+```
