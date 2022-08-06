@@ -11,15 +11,10 @@ class anticipation_mae(nn.Module):
 
     def forward(self, output_rsd, target_rsd):
 
-        wMAE = torch.tensor(0).float().to(self.device)
-        inMAE = torch.tensor(0).float().to(self.device)
-        pMAE = torch.tensor(0).float().to(self.device)
-        eMAE = torch.tensor(0).float().to(self.device)
-
-        nwMAE = 0
-        ninMAE = 0
-        npMAE = 0
-        neMAE = 0
+        wMAE = []
+        inMAE = []
+        pMAE = []
+        eMAE = []
 
         for n in range(output_rsd.size(0)):
             for c in range(output_rsd.size(-1)):
@@ -42,29 +37,19 @@ class anticipation_mae(nn.Module):
                 output_pMAE  = torch.abs(tmp_output[cond_pMAE] - tmp_target[cond_pMAE])
                 output_eMAE = torch.abs(tmp_output[cond_eMAE] - tmp_target[cond_eMAE])
 
-                if torch.isnan(output_wMAE).item() == 0:
-                    nwMAE += 1
-                    wMAE += output_wMAE
 
 
-                if output_inMAE.size(0) > 0:
-                    ninMAE += 1
-                    inMAE += torch.mean(output_inMAE)
+                wMAE.append(output_wMAE)
+                inMAE.append(torch.mean(output_inMAE))
+                pMAE.append(torch.mean(output_pMAE))
+                eMAE.append(torch.mean(output_eMAE))
 
-                if output_pMAE.size(0) > 0:
-                    npMAE += 1
-                    pMAE += torch.mean(output_pMAE)
-
-
-                if output_eMAE.size(0)>0:
-                    neMAE += 1
-                    eMAE += torch.mean(output_eMAE)
-
-        # ensure the zero size would be nan
-        wMAE = wMAE/nwMAE
-        inMAE = inMAE/ninMAE
-        pMAE = pMAE/npMAE
-        eMAE = eMAE/neMAE
+        # use the mean over instrument types in minutes per metric
+        # use the nan mean in case there is no corresponding instrument in the current sequence
+        wMAE = torch.nanmean(torch.stack(wMAE))
+        inMAE = torch.nanmean(torch.stack(inMAE))
+        pMAE = torch.nanmean(torch.stack(pMAE))
+        eMAE = torch.nanmean(torch.stack(eMAE))
 
 
         return wMAE, inMAE, pMAE, eMAE
