@@ -122,91 +122,6 @@ class infer_GCN(nn.Module):
 
             output_feature, tmp_output_stg_RSD, tmp_output_tool_stg_RSD, tmp_output_RSD, frames = self.infer_one_clip(model, data, bb)
 
-            # 2min
-            # tool stage rsd
-            wloss_tool_stg_rsd_2, loss_tool_stg_rsd_2, ploss_tool_stg_rsd_2, eloss_tool_stg_rsd_2 = loss_anticipation_2(
-                tmp_output_tool_stg_RSD[:, :, :5], tmp_tool_RSD)
-
-            wloss_tool_stg_rsd_minute_2 = wloss_tool_stg_rsd_2 / 25 / 60
-            loss_tool_stg_minute_2 = loss_tool_stg_rsd_2 / 25 / 60
-            ploss_tool_stg_rsd_minute_2 = ploss_tool_stg_rsd_2 / 25 / 60
-            eloss_tool_stg_rsd_minute_2 = eloss_tool_stg_rsd_2 / 25 / 60
-
-            wtmp_tool_stageRSD_loss_values_2_val.append(wloss_tool_stg_rsd_minute_2.item())
-            tmp_tool_stageRSD_loss_values_2_val.append(loss_tool_stg_minute_2.item())
-            ptmp_tool_stageRSD_loss_values_2_val.append(ploss_tool_stg_rsd_minute_2.item())
-            etmp_tool_stageRSD_loss_values_2_val.append(eloss_tool_stg_rsd_minute_2.item())
-
-            # stage rsd
-            wloss_stg_rsd_2, loss_stg_rsd_2, ploss_stg_rsd_2, eloss_stg_rsd_2 = loss_anticipation_2(
-                tmp_output_stg_RSD[:, :, :6], tmp_stage_RSD)
-
-            wloss_stg_rsd_minute_2 = wloss_stg_rsd_2 / 25 / 60
-            loss_stg_minute_2 = loss_stg_rsd_2 / 25 / 60
-            ploss_stg_rsd_minute_2 = ploss_stg_rsd_2 / 25 / 60
-            eloss_stg_rsd_minute_2 = eloss_stg_rsd_2 / 25 / 60
-
-            wtmp_stageRSD_loss_values_2_val.append(wloss_stg_rsd_minute_2.item())
-            tmp_stageRSD_loss_values_2_val.append(loss_stg_minute_2.item())
-            ptmp_stageRSD_loss_values_2_val.append(ploss_stg_rsd_minute_2.item())
-            etmp_stageRSD_loss_values_2_val.append(eloss_stg_rsd_minute_2.item())
-            # 3min
-            # tool stage rsd
-            wloss_tool_stg_rsd_3, loss_tool_stg_rsd_3, ploss_tool_stg_rsd_3, eloss_tool_stg_rsd_3 = loss_anticipation_3(
-                tmp_output_tool_stg_RSD[:, :, 5:10], tmp_tool_RSD)
-
-            wloss_tool_stg_rsd_minute_3 = wloss_tool_stg_rsd_3 / 25 / 60
-            loss_tool_stg_minute_3 = loss_tool_stg_rsd_3 / 25 / 60
-            ploss_tool_stg_rsd_minute_3 = ploss_tool_stg_rsd_3 / 25 / 60
-            eloss_tool_stg_rsd_minute_3 = eloss_tool_stg_rsd_3 / 25 / 60
-
-            wtmp_tool_stageRSD_loss_values_3_val.append(wloss_tool_stg_rsd_minute_3.item())
-            tmp_tool_stageRSD_loss_values_3_val.append(loss_tool_stg_minute_3.item())
-            ptmp_tool_stageRSD_loss_values_3_val.append(ploss_tool_stg_rsd_minute_3.item())
-            etmp_tool_stageRSD_loss_values_3_val.append(eloss_tool_stg_rsd_minute_3.item())
-
-            # stage rsd
-            wloss_stg_rsd_3, loss_stg_rsd_3, ploss_stg_rsd_3, eloss_stg_rsd_3 = loss_anticipation_3(
-                tmp_output_stg_RSD[:, :, 6:12], tmp_stage_RSD)
-
-            wloss_stg_rsd_minute_3 = wloss_stg_rsd_3 / 25 / 60
-            loss_stg_minute_3 = loss_stg_rsd_3 / 25 / 60
-            ploss_stg_rsd_minute_3 = ploss_stg_rsd_3 / 25 / 60
-            eloss_stg_rsd_minute_3 = eloss_stg_rsd_3 / 25 / 60
-
-            wtmp_stageRSD_loss_values_3_val.append(wloss_stg_rsd_minute_3.item())
-            tmp_stageRSD_loss_values_3_val.append(loss_stg_minute_3.item())
-            ptmp_stageRSD_loss_values_3_val.append(ploss_stg_rsd_minute_3.item())
-            etmp_stageRSD_loss_values_3_val.append(eloss_stg_rsd_minute_3.item())
-
-            # 5min
-            # tool stage rsd 5
-            wloss_tool_stg_rsd_5, loss_tool_stg_rsd_5, ploss_tool_stg_rsd_5, eloss_tool_stg_rsd_5 = loss_anticipation(
-                tmp_output_tool_stg_RSD[:, :, 10:], tmp_tool_RSD)
-
-            wloss_tool_stg_rsd_minute_5 = wloss_tool_stg_rsd_5 / 25 / 60
-            loss_tool_stg_minute_5 = loss_tool_stg_rsd_5 / 25 / 60
-            ploss_tool_stg_rsd_minute_5 = ploss_tool_stg_rsd_5 / 25 / 60
-            eloss_tool_stg_rsd_minute_5 = eloss_tool_stg_rsd_5 / 25 / 60
-
-            wtmp_tool_stageRSD_loss_values_5_val.append(wloss_tool_stg_rsd_minute_5.item())
-            tmp_tool_stageRSD_loss_values_5_val.append(loss_tool_stg_minute_5.item())
-            ptmp_tool_stageRSD_loss_values_5_val.append(ploss_tool_stg_rsd_minute_5.item())
-            etmp_tool_stageRSD_loss_values_5_val.append(eloss_tool_stg_rsd_minute_5.item())
-            # stage rsd 5
-            wloss_stg_rsd_5, loss_stg_rsd_5, ploss_stg_rsd_5, eloss_stg_rsd_5 = loss_anticipation(
-                tmp_output_stg_RSD[:, :, 12:], tmp_stage_RSD)
-
-            wloss_stg_rsd_minute_5 = wloss_stg_rsd_5 / 25 / 60
-            loss_stg_minute_5 = loss_stg_rsd_5 / 25 / 60
-            ploss_stg_rsd_minute_5 = ploss_stg_rsd_5 / 25 / 60
-            eloss_stg_rsd_minute_5 = eloss_stg_rsd_5 / 25 / 60
-
-            wtmp_stageRSD_loss_values_5_val.append(wloss_stg_rsd_minute_5.item())
-            tmp_stageRSD_loss_values_5_val.append(loss_stg_minute_5.item())
-            ptmp_stageRSD_loss_values_5_val.append(ploss_stg_rsd_minute_5.item())
-            etmp_stageRSD_loss_values_5_val.append(eloss_stg_rsd_minute_5.item())
-
             if t == 0:
                 output_stg_RSD = tmp_output_stg_RSD
                 output_tool_stg_RSD = tmp_output_tool_stg_RSD
@@ -261,7 +176,87 @@ class infer_GCN(nn.Module):
         loss_total = loss_tool_stg_minute + loss_stg_minute  # + loss_stg + loss_Elapsed_minute #att_loss+ loss_stg_minute + att_loss
         tmp_total_loss_val.append(loss_total.item())
 
+        # 2min
+        # tool stage rsd
+        wloss_tool_stg_rsd_2, loss_tool_stg_rsd_2, ploss_tool_stg_rsd_2, eloss_tool_stg_rsd_2 = loss_anticipation_2(
+            output_tool_stg_RSD[:, :, :5], tool_RSD)
 
+        wloss_tool_stg_rsd_minute_2 = wloss_tool_stg_rsd_2/ 25 / 60
+        loss_tool_stg_minute_2 = loss_tool_stg_rsd_2 / 25 / 60
+        ploss_tool_stg_rsd_minute_2 = ploss_tool_stg_rsd_2 / 25 / 60
+        eloss_tool_stg_rsd_minute_2 = eloss_tool_stg_rsd_2 / 25 / 60
+
+        wtmp_tool_stageRSD_loss_values_2_val.append(wloss_tool_stg_rsd_minute_2.item())
+        tmp_tool_stageRSD_loss_values_2_val.append(loss_tool_stg_minute_2.item())
+        ptmp_tool_stageRSD_loss_values_2_val.append(ploss_tool_stg_rsd_minute_2.item())
+        etmp_tool_stageRSD_loss_values_2_val.append(eloss_tool_stg_rsd_minute_2.item())
+
+        # stage rsd
+        wloss_stg_rsd_2, loss_stg_rsd_2, ploss_stg_rsd_2, eloss_stg_rsd_2 = loss_anticipation_2(output_stg_RSD[:, :, :6], stage_RSD)
+
+        wloss_stg_rsd_minute_2 = wloss_stg_rsd_2 / 25 / 60
+        loss_stg_minute_2 = loss_stg_rsd_2 / 25 / 60
+        ploss_stg_rsd_minute_2 = ploss_stg_rsd_2 / 25 / 60
+        eloss_stg_rsd_minute_2 = eloss_stg_rsd_2 / 25 / 60
+
+        wtmp_stageRSD_loss_values_2_val.append(wloss_stg_rsd_minute_2.item())
+        tmp_stageRSD_loss_values_2_val.append(loss_stg_minute_2.item())
+        ptmp_stageRSD_loss_values_2_val.append(ploss_stg_rsd_minute_2.item())
+        etmp_stageRSD_loss_values_2_val.append(eloss_stg_rsd_minute_2.item())
+        # 3min
+        # tool stage rsd
+        wloss_tool_stg_rsd_3, loss_tool_stg_rsd_3, ploss_tool_stg_rsd_3, eloss_tool_stg_rsd_3 = loss_anticipation_3(
+            output_tool_stg_RSD[:, :, 5:10], tool_RSD)
+
+        wloss_tool_stg_rsd_minute_3 = wloss_tool_stg_rsd_3/ 25 / 60
+        loss_tool_stg_minute_3 = loss_tool_stg_rsd_3 / 25 / 60
+        ploss_tool_stg_rsd_minute_3 = ploss_tool_stg_rsd_3 / 25 / 60
+        eloss_tool_stg_rsd_minute_3 = eloss_tool_stg_rsd_3 / 25 / 60
+
+        wtmp_tool_stageRSD_loss_values_3_val.append(wloss_tool_stg_rsd_minute_3.item())
+        tmp_tool_stageRSD_loss_values_3_val.append(loss_tool_stg_minute_3.item())
+        ptmp_tool_stageRSD_loss_values_3_val.append(ploss_tool_stg_rsd_minute_3.item())
+        etmp_tool_stageRSD_loss_values_3_val.append(eloss_tool_stg_rsd_minute_3.item())
+
+        # stage rsd
+        wloss_stg_rsd_3, loss_stg_rsd_3, ploss_stg_rsd_3, eloss_stg_rsd_3 = loss_anticipation_3(output_stg_RSD[:, :, 6:12], stage_RSD)
+
+        wloss_stg_rsd_minute_3 = wloss_stg_rsd_3 / 25 / 60
+        loss_stg_minute_3 = loss_stg_rsd_3 / 25 / 60
+        ploss_stg_rsd_minute_3 = ploss_stg_rsd_3 / 25 / 60
+        eloss_stg_rsd_minute_3 = eloss_stg_rsd_3 / 25 / 60
+
+        wtmp_stageRSD_loss_values_3_val.append(wloss_stg_rsd_minute_3.item())
+        tmp_stageRSD_loss_values_3_val.append(loss_stg_minute_3.item())
+        ptmp_stageRSD_loss_values_3_val.append(ploss_stg_rsd_minute_3.item())
+        etmp_stageRSD_loss_values_3_val.append(eloss_stg_rsd_minute_3.item())
+
+        # 5min
+        # tool stage rsd 5
+        wloss_tool_stg_rsd_5, loss_tool_stg_rsd_5, ploss_tool_stg_rsd_5, eloss_tool_stg_rsd_5 = loss_anticipation(
+            output_tool_stg_RSD[:, :, 10:], tool_RSD)
+
+        wloss_tool_stg_rsd_minute_5 = wloss_tool_stg_rsd_5 / 25 / 60
+        loss_tool_stg_minute_5 = loss_tool_stg_rsd_5 / 25 / 60
+        ploss_tool_stg_rsd_minute_5 = ploss_tool_stg_rsd_5 / 25 / 60
+        eloss_tool_stg_rsd_minute_5 = eloss_tool_stg_rsd_5 / 25 / 60
+
+        wtmp_tool_stageRSD_loss_values_5_val.append(wloss_tool_stg_rsd_minute_5.item())
+        tmp_tool_stageRSD_loss_values_5_val.append(loss_tool_stg_minute_5.item())
+        ptmp_tool_stageRSD_loss_values_5_val.append(ploss_tool_stg_rsd_minute_5.item())
+        etmp_tool_stageRSD_loss_values_5_val.append(eloss_tool_stg_rsd_minute_5.item())
+        # stage rsd 5
+        wloss_stg_rsd_5, loss_stg_rsd_5, ploss_stg_rsd_5, eloss_stg_rsd_5 = loss_anticipation(output_stg_RSD[:, :, 12:], stage_RSD)
+
+        wloss_stg_rsd_minute_5 = wloss_stg_rsd_5 / 25 / 60
+        loss_stg_minute_5 = loss_stg_rsd_5 / 25 / 60
+        ploss_stg_rsd_minute_5 = ploss_stg_rsd_5 / 25 / 60
+        eloss_stg_rsd_minute_5 = eloss_stg_rsd_5 / 25 / 60
+
+        wtmp_stageRSD_loss_values_5_val.append(wloss_stg_rsd_minute_5.item())
+        tmp_stageRSD_loss_values_5_val.append(loss_stg_minute_5.item())
+        ptmp_stageRSD_loss_values_5_val.append(ploss_stg_rsd_minute_5.item())
+        etmp_stageRSD_loss_values_5_val.append(eloss_stg_rsd_minute_5.item())
 
         # tool_wise_2
         output_loss_list = class_wise_loss_anticipation_loss_2(output_tool_stg_RSD[:, :, :5], tool_RSD)
