@@ -30,7 +30,7 @@ If you find this work useful, please consider our paper to cite:
 
 ```
 @inproceedings{zhang22towards,
- author={Zhang, Xiatian and Moubayed, Noura Al and Shum, Hubert P. H.},
+ author={Zhang, Francis Xiatian and Moubayed, Noura Al and Shum, Hubert P. H.},
  booktitle={Proceedings of the 2022 IEEE-EMBS International Conference on Biomedical and Health Informatics},
  title={Towards Graph Representation Learning Based Surgical Workflow Anticipation },
  year={2022},
