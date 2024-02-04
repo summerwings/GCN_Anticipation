@@ -1,4 +1,7 @@
 # Towards Graph Representation Learning Based Surgical Workflow Anticipation
+
+The current GitHub page for this paper is (https://github.com/FrancisXZhang/GCN_Anticipation). If you encounter any issues with my previous projects, please refer to this page.
+
 Example Code for the paper Towards Graph Representation Learning Based Surgical Workflow Anticipation
 
 ![image](Network_Overview.png)
